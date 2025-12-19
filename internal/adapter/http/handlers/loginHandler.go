@@ -17,7 +17,7 @@ func LoginPOST(c *gin.Context) {
 	password := c.PostForm("password")
 
 	// проверка корректности логина и пароля
-	if auth.Login(login, password) {
+	if auth.UC_Login(login, password) {
 		c.Redirect(http.StatusSeeOther, "/")
 	} else {
 		c.HTML(200, "login.html", gin.H{

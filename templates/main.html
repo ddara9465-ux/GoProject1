@@ -1,11 +1,74 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="ru">
 	<head>
 		<meta charset="UTF-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1.0" />
-		<title>Document</title>
+		<title>Запрос звонка</title>
+		<style>
+			body {
+				margin: 0;
+				height: 100vh;
+				display: flex;
+				justify-content: center;
+				align-items: center;
+				font-family: sans-serif;
+			}
+
+			form {
+				display: flex;
+				flex-direction: column; /* сверху вниз */
+				gap: 10px;
+				min-width: 280px;
+			}
+		</style>
 	</head>
 	<body>
-		MainPage
+		<form action="/create-request-appointments" method="post">
+			<!-- Желаемая дата -->
+			<label for="date">Желаемая дата:</label>
+			<input type="date" id="date" name="date" required />
+
+			<!-- Мастер -->
+			<label for="master">Мастер:</label>
+			<select id="master" name="master" required>
+				<option value="">Выберите мастера</option>
+				<option value="Анна">Анна</option>
+				<option value="Ольга">Ольга</option>
+				<option value="Светлана">Светлана</option>
+			</select>
+
+			<!-- Услуга -->
+			<label for="service">Услуга:</label>
+			<select id="service" name="service" required>
+				<option value="">Выберите услугу</option>
+				<option value="Наращивание">Наращивание ногтей (1700)</option>
+				<option value="Коррекция наращенных">
+					Коррекция наращённых ногтей (1300)
+				</option>
+				<option value="Маникюр+лак+укрепление">
+					Маникюр+покрытие гель-лак+укрепление (1300)
+				</option>
+			</select>
+
+			<!-- Комментарий к записи -->
+			<label for="comment">Комментарий к записи:</label>
+			<textarea
+				id="comment"
+				name="comment"
+				rows="3"
+				cols="30"
+				placeholder="Пожелания к записи"
+			></textarea>
+
+			<p>Запросить звонок для согласования записи</p>
+
+			<button type="submit">Отправить</button>
+		</form>
+
+		<script>
+			// запретить выбор прошедших дат
+			const dateInput = document.getElementById('date')
+			const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
+			dateInput.min = today // нельзя выбрать дату меньше сегодняшней
+		</script>
 	</body>
 </html>

@@ -6,8 +6,8 @@ import (
 	"log"
 )
 
-func Login(login string, password string) bool {
-	trueHashPassword, err := persistence.GetPasswordHash_User(context.Background(), login)
+func UC_Login(login string, password string) bool {
+	trueHashPassword, err := persistence.A_GetPasswordHash_User(context.Background(), login)
 	if err != nil {
 		log.Printf("Log err: %v", err)
 	} else {
