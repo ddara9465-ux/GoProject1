@@ -6,7 +6,7 @@ import (
 	"log"
 )
 
-func RegisterTransaction(password string, first_name string, last_name string, phone string, email string) bool {
+func A_RegisterTransaction(password string, first_name string, last_name string, phone string, email string) bool {
 	var user_id int
 	login := email
 	rt, err := db.Pool.Begin(context.Background()) // создаем транзакцию

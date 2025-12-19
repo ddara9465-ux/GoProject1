@@ -21,7 +21,7 @@ func RegisterPOST(c *gin.Context) {
 	password := c.PostForm("password")
 
 	//функция регистрации
-	if auth.Register(password, first_name, last_name, phone, email) {
+	if auth.UC_Register(password, first_name, last_name, phone, email) {
 		log.Print("Успешная регистрация")
 	} else {
 		log.Print("Ошибка регистрации")

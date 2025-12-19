@@ -5,7 +5,7 @@ import (
 	"context"
 )
 
-func GetPasswordHash_User(ctx context.Context, login string) (string, error) {
+func A_GetPasswordHash_User(ctx context.Context, login string) (string, error) {
 	var truePassword string
 	err := db.Pool.QueryRow(ctx,
 		"SELECT password_hash FROM users WHERE login=$1",
