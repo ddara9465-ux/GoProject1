@@ -3,6 +3,7 @@ package http
 import (
 	"GoProject1/internal/application/usecases/auth"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -17,11 +18,14 @@ func LoginPOST(c *gin.Context) {
 	password := c.PostForm("password")
 
 	// проверка корректности логина и пароля
-	if auth.UC_Login(login, password) {
+	userID, err := auth.UC_Login(login, password)
+	if err {
 		c.Redirect(http.StatusSeeOther, "/")
+		c.SetCookie("user_id", strconv.Itoa(userID), 3600, "/", "", false, true) // устанавливаем кук с значение userID (запомнили пользователя)
 	} else {
 		c.HTML(200, "login.html", gin.H{
 			"Error": "Неверный логин или пароль",
 		})
+
 	}
 }

@@ -4,6 +4,7 @@ import (
 	"GoProject1/internal/application/usecases/auth"
 	"log"
 	"net/http"
+	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
@@ -21,8 +22,11 @@ func RegisterPOST(c *gin.Context) {
 	password := c.PostForm("password")
 
 	//функция регистрации
-	if auth.UC_Register(password, first_name, last_name, phone, email) {
+	userID, err := auth.UC_Register(password, first_name, last_name, phone, email)
+	if err {
 		log.Print("Успешная регистрация")
+		c.Redirect(http.StatusSeeOther, "/")
+		c.SetCookie("user_id", strconv.Itoa(userID), 3600, "/", "", false, true) // устанавливаем кук с значение userID (запомнили пользователя)
 	} else {
 		log.Print("Ошибка регистрации")
 	}

@@ -6,17 +6,18 @@ import (
 	"log"
 )
 
-func UC_Login(login string, password string) bool {
-	trueHashPassword, err := persistence.A_GetPasswordHash_User(context.Background(), login)
+func UC_Login(login string, password string) (int, bool) {
+	trueHashPassword, userID, err := persistence.A_GetPasswordHash_User(context.Background(), login)
 	if err != nil {
 		log.Printf("Log err: %v", err)
 	} else {
 		if password == trueHashPassword {
 			log.Print("Login func | Данные авторизации подтверждены")
-			return true
+
+			return userID, true
 		} else {
 			log.Print("Login func | Неверные данные авторизации")
 		}
 	}
-	return false
+	return 0, false
 }
