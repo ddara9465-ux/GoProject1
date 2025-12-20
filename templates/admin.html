@@ -1,0 +1,70 @@
+{{ define "admin.tmpl" }}
+<!DOCTYPE html>
+<html lang="ru">
+	<head>
+		<meta charset="UTF-8" />
+		<title>Админ панель</title>
+		<style>
+			body {
+				font-family: sans-serif;
+				padding: 24px;
+			}
+			table {
+				border-collapse: collapse;
+				width: 100%;
+				max-width: 1100px;
+			}
+			th,
+			td {
+				border: 1px solid #ddd;
+				padding: 8px;
+			}
+			th {
+				background: #f5f5f5;
+				text-align: left;
+			}
+			tr:nth-child(even) {
+				background: #fafafa;
+			}
+		</style>
+	</head>
+	<body>
+		<h2>Записи</h2>
+
+		<table>
+			<thead>
+				<tr>
+					<th>id</th>
+
+					<th>first_name</th>
+					<th>phone</th>
+					<th>procedure</th>
+					<th>employee</th>
+					<th>appointment_date</th>
+					<th>status</th>
+					<th>notes</th>
+				</tr>
+			</thead>
+			<tbody>
+				{{ if .Appointments }} {{ range .Appointments }}
+				<tr>
+					<td>{{ .ID }}</td>
+
+					<td>{{ .FirstName }}</td>
+					<td>{{ .Phone }}</td>
+					<td>{{ .Procedure }}</td>
+					<td>{{ .Employee }}</td>
+					<td>{{ .AppointmentDate }}</td>
+					<td>{{ .Status }}</td>
+					<td>{{ .Notes }}</td>
+				</tr>
+				{{ end }} {{ else }}
+				<tr>
+					<td colspan="9">Записей нет</td>
+				</tr>
+				{{ end }}
+			</tbody>
+		</table>
+	</body>
+</html>
+{{ end }}

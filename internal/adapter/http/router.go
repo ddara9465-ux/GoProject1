@@ -15,4 +15,6 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/", http.MainGET)
 	r.POST("/create-request-appointments", http.CreateRequestAppointments)
+
+	r.GET("/admin", http.Admin)
 }

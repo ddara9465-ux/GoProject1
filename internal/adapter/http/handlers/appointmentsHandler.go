@@ -3,23 +3,22 @@ package http
 import (
 	"GoProject1/internal/application/usecases/appointments"
 	"log"
-	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
 )
 
 func CreateRequestAppointments(c *gin.Context) {
+	//читаем куки
 	userIDStr, err := c.Cookie("user_id")
 	if err != nil {
 		// куки нет
 		log.Print("Нет кука входа")
 		return
 	}
-
+	// переводим кук в число(была строка)
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
-		c.JSON(http.StatusBadRequest, gin.H{"error": "invalid user_id cookie"})
 		return
 	}
 
