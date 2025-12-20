@@ -1,70 +1,68 @@
 {{ define "admin.tmpl" }}
 <!DOCTYPE html>
 <html lang="ru">
-	<head>
-		<meta charset="UTF-8" />
-		<title>Админ панель</title>
-		<style>
-			body {
-				font-family: sans-serif;
-				padding: 24px;
-			}
-			table {
-				border-collapse: collapse;
-				width: 100%;
-				max-width: 1100px;
-			}
-			th,
-			td {
-				border: 1px solid #ddd;
-				padding: 8px;
-			}
-			th {
-				background: #f5f5f5;
-				text-align: left;
-			}
-			tr:nth-child(even) {
-				background: #fafafa;
-			}
-		</style>
-	</head>
-	<body>
-		<h2>Записи</h2>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Админ панель</title>
+    <style>
+      body { font-family: sans-serif; padding: 24px; }
+      table { border-collapse: collapse; width: 100%; max-width: 1100px; }
+      th, td { border: 1px solid #ddd; padding: 8px; }
+      th { background: #f5f5f5; text-align: left; }
+      tr:nth-child(even) { background: #fafafa; }
+      form { margin: 0; }
+    </style>
+  </head>
+  <body>
+    <h2>Записи</h2>
 
-		<table>
-			<thead>
-				<tr>
-					<th>id</th>
+    <table>
+      <thead>
+        <tr>
+          <th>appointment_id</th>
+          <th>first_name</th>
+          <th>phone</th>
+          <th>procedure</th>
+          <th>employee</th>
+          <th>appointment_date</th>
+          <th>status</th>
+          <th>notes</th>
+          <th>действие</th>
+        </tr>
+      </thead>
 
-					<th>first_name</th>
-					<th>phone</th>
-					<th>procedure</th>
-					<th>employee</th>
-					<th>appointment_date</th>
-					<th>status</th>
-					<th>notes</th>
-				</tr>
-			</thead>
-			<tbody>
-				{{ if .Appointments }} {{ range .Appointments }}
-				<tr>
-					<td>{{ .ID }}</td>
+      <tbody>
+        {{ if .Appointments }}
+          {{ range .Appointments }}
+          <tr>
+            <td>{{ .ID }}</td>
+            <td>{{ .FirstName }}</td>
+            <td>{{ .Phone }}</td>
+            <td>{{ .Procedure }}</td>
+            <td>{{ .Employee }}</td>
+            <td>{{ .AppointmentDate }}</td>
+            <td>{{ .Status }}</td>
+            <td>{{ .Notes }}</td>
 
-					<td>{{ .FirstName }}</td>
-					<td>{{ .Phone }}</td>
-					<td>{{ .Procedure }}</td>
-					<td>{{ .Employee }}</td>
-					<td>{{ .AppointmentDate }}</td>
-					<td>{{ .Status }}</td>
-					<td>{{ .Notes }}</td>
-				</tr>
-				{{ end }} {{ else }}
-				<tr>
-					<td colspan="9">Записей нет</td>
-				</tr>
-				{{ end }}
-			</tbody>
-		</table>
-	</body>
+            <td>
+              <form method="POST" action="/admin/appointments/status">
+                <input type="hidden" name="id" value="{{ .ID }}" />
+                <select name="status">
+                  <option value="Ожидает" {{ if eq .Status "new" }}selected{{ end }}>Ожидает</option>
+                  <option value="Подтверждена" {{ if eq .Status "confirmed" }}selected{{ end }}>Подтверждена</option>
+                  <option value="Выполнена" {{ if eq .Status "done" }}selected{{ end }}>Выполнена</option>
+                  <option value="Отменена" {{ if eq .Status "cancelled" }}selected{{ end }}>Отменена</option>
+                </select>
+                <button type="submit">Изменить</button>
+              </form>
+            </td>
+          </tr>
+          {{ end }}
+        {{ else }}
+          <tr><td colspan="9">Записей нет</td></tr>
+        {{ end }}
+      </tbody>
+    </table>
+  </body>
 </html>
 {{ end }}

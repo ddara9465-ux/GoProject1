@@ -6,14 +6,18 @@ import (
 	"log"
 )
 
-func A_CreateRequestAppointments(date string, employee string, procedure string, notes string, userID int) {
+// A_CreateRequestAppointments создаёт запись в appointments со статусом "Запрос звонка".
+func A_CreateRequestAppointments(date, employee, procedure, notes string, userID int) {
 	status := "Запрос звонка"
-	_, err := db.Pool.Exec(context.Background(),
-		"INSERT INTO appointments (client_id, procedure, employee, appointment_date, status, notes) VALUES ($1,$2,$3,$4,$5,$6)",
+
+	// INSERT: сохраняем заявку на запись (client_id берём из userID).
+	_, err := db.Pool.Exec(
+		context.Background(),
+		`INSERT INTO appointments (client_id, procedure, employee, appointment_date, status, notes)
+		 VALUES ($1,$2,$3,$4,$5,$6)`,
 		userID, procedure, employee, date, status, notes,
 	)
 	if err != nil {
 		log.Fatal("Ошибка при создании запроса записи:", err)
 	}
-
 }

@@ -17,6 +17,7 @@ type Appointment struct {
 	Notes           string
 }
 
+// A_GetAllAppointments достаёт все записи + данные клиента (first_name, phone) через JOIN.
 func A_GetAllAppointments() ([]Appointment, error) {
 	rows, err := db.Pool.Query(context.Background(), `
 		SELECT
@@ -38,6 +39,7 @@ func A_GetAllAppointments() ([]Appointment, error) {
 	}
 	defer rows.Close()
 
+	// Собираем результат в слайс структур.
 	apps := make([]Appointment, 0)
 	for rows.Next() {
 		var a Appointment
@@ -56,6 +58,8 @@ func A_GetAllAppointments() ([]Appointment, error) {
 		}
 		apps = append(apps, a)
 	}
+
+	// Проверяем ошибку, которая могла появиться во время итерации rows.
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}

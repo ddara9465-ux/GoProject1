@@ -5,15 +5,20 @@ import (
 	"context"
 )
 
+// A_GetPasswordHash_User достаёт password_hash и id по логину (нужно для проверки пароля при входе).
 func A_GetPasswordHash_User(ctx context.Context, login string) (string, int, error) {
-	var truePassword string
+	var passwordHash string
 	var userID int
-	err := db.Pool.QueryRow(ctx,
-		"SELECT password_hash, id FROM users WHERE login=$1",
+
+	// QueryRow ждём 1 строку; ошибка появится на Scan (в т.ч. если пользователя нет).
+	err := db.Pool.QueryRow(
+		ctx,
+		`SELECT password_hash, id FROM users WHERE login = $1`,
 		login,
-	).Scan(&truePassword, &userID)
+	).Scan(&passwordHash, &userID)
 	if err != nil {
 		return "", 0, err
 	}
-	return truePassword, userID, nil
+
+	return passwordHash, userID, nil
 }
