@@ -8,16 +8,18 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// показать страницу логина
 func LoginGET(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", nil)
 }
 
+// отправить запрос аутентификации
 func LoginPOST(c *gin.Context) {
 	// получаем данные с формы
 	login := c.PostForm("login")
 	password := c.PostForm("password")
 
-	// проверка корректности логина и пароля
+	// Функция проверка корректности логина и пароля
 	userID, err := auth.UC_Login(login, password)
 	if err {
 		c.Redirect(http.StatusSeeOther, "/")

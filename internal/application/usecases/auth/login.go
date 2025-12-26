@@ -18,7 +18,7 @@ func UC_Login(login string, password string) (int, bool) {
 		return 0, false
 	}
 
-	// Проверяем пароль через bcrypt: nil = пароль подошёл, error = не подошёл/хеш битый.
+	// Проверяем пароль через шифрование bcrypt: nil = пароль подошёл, error = не подошёл/хеш битый.
 	err = bcrypt.CompareHashAndPassword([]byte(trueHashPassword), []byte(password))
 	if err != nil {
 		log.Printf("Login func | Неверный пароль для пользователя login=%v", login)

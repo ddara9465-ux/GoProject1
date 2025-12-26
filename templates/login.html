@@ -6,7 +6,20 @@
 		<title>Вход</title>
 	</head>
 	<body>
-		<h1>Вход</h1>
+		<div style="text-align: center; margin: 20px 0;">
+			<a href="/admin-login" style="
+				display: inline-block;
+				background: #c9c9c8;
+				color: rgb(0, 0, 0);
+				padding: 10px 20px;
+				text-decoration: none;
+				border-radius: 5px;
+				font-weight: bold;
+				margin-bottom: 20px;
+			"> Вход для администраторов</a>
+		</div>
+
+		<h1>Вход для клиентов</h1>
 		{{if .Error}}
 		<div style="color: red">{{.Error}}</div>
 		{{end}}

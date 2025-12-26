@@ -33,8 +33,9 @@ func main() {
 	log.Print("Запуск сервера")
 	r := gin.Default()            // Создаем новый экземпляр
 	r.LoadHTMLGlob("templates/*") // страницы HTML
-	http.SetupRoutes(r)           // роутеры
+	http.SetupRoutes(r)           // роутеры(маршруты)
 
 	// Запускаем сервер на порту 8080
+	log.Print("Запуск сервера на http://localhost:8080")
 	r.Run(":8080")
 }

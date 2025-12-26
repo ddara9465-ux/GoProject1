@@ -3,6 +3,7 @@ package http
 import (
 	"GoProject1/internal/application/usecases/appointments"
 	"log"
+	"net/http"
 	"strconv"
 
 	"github.com/gin-gonic/gin"
@@ -31,4 +32,5 @@ func CreateRequestAppointments(c *gin.Context) {
 
 	// Передаём данные в слой usecases
 	appointments.UC_CreateRequestAppointments(date, employee, procedure, notes, userID)
+	c.Redirect(http.StatusSeeOther, "/")
 }

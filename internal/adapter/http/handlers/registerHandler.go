@@ -9,10 +9,12 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Показать страницу регистрации
 func RegisterGET(c *gin.Context) {
 	c.HTML(http.StatusOK, "register.html", nil)
 }
 
+// Отправить запрос регистрации
 func RegisterPOST(c *gin.Context) {
 	// получаеи данные с формы
 	first_name := c.PostForm("first_name")

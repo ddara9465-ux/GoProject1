@@ -6,28 +6,78 @@
     <title>Админ панель</title>
     <style>
       body { font-family: sans-serif; padding: 24px; }
-      table { border-collapse: collapse; width: 100%; max-width: 1100px; }
+      table { border-collapse: collapse; width: 100%; max-width: 1400px; }
       th, td { border: 1px solid #ddd; padding: 8px; }
       th { background: #f5f5f5; text-align: left; }
       tr:nth-child(even) { background: #fafafa; }
-      form { margin: 0; }
+      .action-cell {
+        min-width: 280px;
+      }
+      .action-form {
+        margin-bottom: 8px;
+        display: block;
+      }
+      .action-buttons {
+        display: flex;
+        flex-direction: column;
+        gap: 5px;
+        width: 100%;
+      }
+      .edit-row {
+        display: flex;
+        gap: 5px;
+        margin-bottom: 5px;
+      }
+      .edit-input {
+        padding: 4px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+        flex: 1;
+      }
+      .btn {
+        padding: 6px 12px;
+        border: none;
+        cursor: pointer;
+        border-radius: 4px;
+        font-size: 14px;
+        width: 100%;
+        box-sizing: border-box;
+      }
+      .btn-status {
+        background-color: #4a90e2;
+        color: white;
+      }
+      .btn-save {
+        background-color: #63a566;
+        color: white;
+      }
+      .btn-delete {
+        background-color: #d43636;
+        color: white;
+      }
+      select {
+        padding: 4px;
+        border: 1px solid #ddd;
+        border-radius: 3px;
+      }
     </style>
   </head>
   <body>
-    <h2>Записи</h2>
+    <h2>Админ панель - Управление записями</h2>
+    <p><a href="/">← Вернуться на главную</a></p>
 
     <table>
       <thead>
         <tr>
-          <th>appointment_id</th>
-          <th>first_name</th>
-          <th>phone</th>
-          <th>procedure</th>
-          <th>employee</th>
-          <th>appointment_date</th>
-          <th>status</th>
-          <th>notes</th>
-          <th>действие</th>
+          <th>ID</th>
+          <th>Имя</th>
+          <th>Телефон</th>
+          <th>Услуга</th>
+          <th>Мастер</th>
+          <th>Дата</th>
+          <th>Статус</th>
+          <th>Заметки</th>
+          <th class="action-cell">Действия</th>
         </tr>
       </thead>
 
@@ -44,17 +94,53 @@
             <td>{{ .Status }}</td>
             <td>{{ .Notes }}</td>
 
-            <td>
-              <form method="POST" action="/admin/appointments/status">
-                <input type="hidden" name="id" value="{{ .ID }}" />
-                <select name="status">
-                  <option value="Ожидает" {{ if eq .Status "new" }}selected{{ end }}>Ожидает</option>
-                  <option value="Подтверждена" {{ if eq .Status "confirmed" }}selected{{ end }}>Подтверждена</option>
-                  <option value="Выполнена" {{ if eq .Status "done" }}selected{{ end }}>Выполнена</option>
-                  <option value="Отменена" {{ if eq .Status "cancelled" }}selected{{ end }}>Отменена</option>
-                </select>
-                <button type="submit">Изменить</button>
-              </form>
+            <td class="action-cell">
+              <div class="action-buttons">
+                <!-- Форма изменения статуса -->
+                <form method="POST" action="/admin/appointments/status" class="action-form">
+                  <input type="hidden" name="id" value="{{ .ID }}" />
+                  <select name="status" style="width: 100%; margin-bottom: 5px;">
+                    <option value="Запрос звонка" {{ if eq .Status "Запрос звонка" }}selected{{ end }}>Запрос звонка</option>
+                    <option value="Подтверждена" {{ if eq .Status "Подтверждена" }}selected{{ end }}>Подтверждена</option>
+                    <option value="Отменена" {{ if eq .Status "Отменена" }}selected{{ end }}>Отменена</option>
+                  </select>
+                  <button type="submit" class="btn btn-status">Изменить статус</button>
+                </form>
+                
+                <!-- Форма редактирования -->
+                <form method="POST" action="/admin/appointments/edit-details" class="action-form">
+                  <input type="hidden" name="id" value="{{ .ID }}" />
+                  
+                  <!-- Строка с полями редактирования -->
+                  <div class="edit-row">
+                    <!-- Поле даты -->
+                    <input type="date" name="date" value="{{ .AppointmentDate }}" class="edit-input" />
+                    
+                    <!-- Выбор мастера -->
+                    <select name="master" class="edit-input">
+                      <option value="Анна" {{if eq .Employee "Анна"}}selected{{end}}>Анна</option>
+                      <option value="Ольга" {{if eq .Employee "Ольга"}}selected{{end}}>Ольга</option>
+                      <option value="Светлана" {{if eq .Employee "Светлана"}}selected{{end}}>Светлана</option>
+                    </select>
+                    
+                    <!-- Выбор услуги -->
+                    <select name="service" class="edit-input">
+                      <option value="Наращивание" {{if eq .Procedure "Наращивание"}}selected{{end}}>Наращивание</option>
+                      <option value="Коррекция наращенных" {{if eq .Procedure "Коррекция наращенных"}}selected{{end}}>Коррекция</option>
+                      <option value="Маникюр+лак+укрепление" {{if eq .Procedure "Маникюр+лак+укрепление"}}selected{{end}}>Маникюр</option>
+                    </select>
+                  </div>
+                  
+                  <!-- Кнопка сохранить -->
+                  <button type="submit" class="btn btn-save">Сохранить изменения</button>
+                </form>
+                
+                <!-- Форма удаления записи -->
+                <form method="POST" action="/admin/appointments/delete" class="action-form">
+                  <input type="hidden" name="id" value="{{ .ID }}" />
+                  <button type="submit" class="btn btn-delete">Удалить запись</button>
+                </form>
+              </div>
             </td>
           </tr>
           {{ end }}

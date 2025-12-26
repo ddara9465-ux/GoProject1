@@ -6,6 +6,8 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
+// Маршрутизация запрососв
+// Запрос -вызываемая фукнция
 func SetupRoutes(r *gin.Engine) {
 	r.GET("/login", http.LoginGET)
 	r.POST("/login", http.LoginPOST)
@@ -18,4 +20,13 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/admin", http.Admin)
 	r.POST("/admin/appointments/status", http.AdminUpdateAppointmentStatus)
+
+	r.POST("/admin/appointments/delete", http.AppointmentDelete)
+
+	r.POST("/admin/appointments/edit-details", http.AdminEditDetails)
+
+	r.GET("/admin-login", http.AdminLoginGET)
+	r.POST("/admin-login", http.AdminLoginPOST)
+	r.GET("/admin-logout", http.AdminLogout)
+
 }
