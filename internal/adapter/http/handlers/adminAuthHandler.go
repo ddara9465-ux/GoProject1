@@ -1,7 +1,7 @@
 package http
 
 import (
-	"GoProject1/internal/adapter/persistence"
+	"GoProject1/internal/application/usecases/auth"
 	"log"
 	"net/http"
 	"strconv"
@@ -9,42 +9,30 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// AdminLoginGET показывает страницу входа для админов
+// Отобразить экран админ логина
 func AdminLoginGET(c *gin.Context) {
 	c.HTML(http.StatusOK, "admin_login.html", nil)
 }
 
-// AdminLoginPOST обрабатывает вход админа
+// Запрос авторизации
 func AdminLoginPOST(c *gin.Context) {
-	username := c.PostForm("username")
+	//Получаем данные с формы
+	login := c.PostForm("login")
 	password := c.PostForm("password")
 
-	// Проверяем логин/пароль
-	success, adminID, err := persistence.CheckAdminAuth(username, password)
+	//Вызываем функцию проверки авторизации
+	userID, err := auth.UC_AdmimAuth(login, password)
 	if err != nil {
-		log.Printf("Ошибка: %v", err)
-	}
-	if success {
-		// Устанавливаем специальную куку для админа
-		c.SetCookie("admin_id", strconv.Itoa(adminID), 3600, "/admin", "", false, true)
-		c.SetCookie("admin_name", username, 3600, "/admin", "", false, true)
+		log.Printf("Ошибка авторизации: %v", err)
+		c.Redirect(http.StatusSeeOther, "/login")
+	} else {
+		isAdmin := 1 // Ставим что админ, если нет ошибки
+		// устанавливаем кук с значение userID (запомнили пользователя)
+		c.SetCookie("user_id", strconv.Itoa(userID), 3600, "/", "", false, true)
 
-		log.Printf("Админ %s вошел в систему", username)
+		// устанавливаем кук с значение isAdmin (запомнили админа)
+		c.SetCookie("isAdmin", strconv.Itoa(isAdmin), 3600, "/", "", false, true)
 		c.Redirect(http.StatusSeeOther, "/admin")
-		return
 	}
 
-	// Если ошибка - показываем форму снова
-	c.HTML(http.StatusOK, "admin_login.html", gin.H{
-		"Error": "Неверное имя администратора или пароль",
-	})
-}
-
-// AdminLogout выходит из админки
-func AdminLogout(c *gin.Context) {
-	// Удаляем куки админа
-	c.SetCookie("admin_id", "", -1, "/admin", "", false, true)
-	c.SetCookie("admin_name", "", -1, "/admin", "", false, true)
-
-	c.Redirect(http.StatusSeeOther, "/")
 }

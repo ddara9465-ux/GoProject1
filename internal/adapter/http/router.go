@@ -18,7 +18,7 @@ func SetupRoutes(r *gin.Engine) {
 	r.GET("/", http.MainGET)
 	r.POST("/create-request-appointments", http.CreateRequestAppointments)
 
-	r.GET("/admin", http.Admin)
+	r.GET("/admin", http.AdminMain)
 	r.POST("/admin/appointments/status", http.AdminUpdateAppointmentStatus)
 
 	r.POST("/admin/appointments/delete", http.AppointmentDelete)
@@ -27,6 +27,4 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/admin-login", http.AdminLoginGET)
 	r.POST("/admin-login", http.AdminLoginPOST)
-	r.GET("/admin-logout", http.AdminLogout)
-
 }

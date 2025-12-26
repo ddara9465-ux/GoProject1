@@ -3,30 +3,15 @@ package persistence
 import (
 	"GoProject1/internal/infrastructure/db"
 	"context"
-	"fmt"
+	"log"
 )
 
-// CheckAdminAuth проверяет логин/пароль админа
-func CheckAdminAuth(username, password string) (bool, int, error) {
-	var adminID int
-	var storedPassword string
-
-	// Простая проверка (можно добавить bcrypt позже)
-	query := `SELECT id, password_hash FROM admins_login 
-	          WHERE username = $1 AND is_active = true`
-
-	err := db.Pool.QueryRow(context.Background(), query, username).Scan(
-		&adminID, &storedPassword,
-	)
-
+func A_AdminAuth(login string) (passwordHash string, userID int, isAdmin bool) {
+	query := `SELECT id, password_hash, is_admin FROM users WHERE login = $1`
+	err := db.Pool.QueryRow(context.Background(), query, login).Scan(&userID, &passwordHash, &isAdmin)
 	if err != nil {
-		return false, 0, fmt.Errorf("админ не найден")
+		log.Printf("Error persistence A_AdminAuth: %v", err)
+		return "0", 0, false
 	}
-
-	// Простая проверка пароля (лучше использовать bcrypt)
-	if password != storedPassword {
-		return false, 0, fmt.Errorf("неверный пароль")
-	}
-
-	return true, adminID, nil
+	return passwordHash, userID, isAdmin
 }

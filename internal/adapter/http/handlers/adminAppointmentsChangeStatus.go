@@ -12,7 +12,7 @@ func AdminUpdateAppointmentStatus(c *gin.Context) {
 	idStr := c.PostForm("id")
 	status := c.PostForm("status")
 
-	// id из формы -> int
+	// id из формы переводит в  int
 	id, err := strconv.Atoi(idStr)
 	if err != nil {
 		return
