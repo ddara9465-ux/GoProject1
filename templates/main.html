@@ -31,10 +31,11 @@
 			<label for="master">Мастер:</label>
 			<select id="master" name="master" required>
 				<option value="">Выберите мастера</option>
-				<option value="Анна">Анна</option>
-				<option value="Ольга">Ольга</option>
-				<option value="Светлана">Светлана</option>
+				{{range .masters}}
+				<option value="{{.Name}}">{{.Name}}{{if .Specialization}} ({{.Specialization}}){{end}}</option>
+				{{end}}
 			</select>
+
 
 			<!-- Услуга -->
 			<label for="service">Услуга:</label>
@@ -62,6 +63,8 @@
 			<p>Запросить звонок для согласования записи</p>
 
 			<button type="submit">Отправить</button>
+
+			<button type="button" onclick="logout()" class="logout-btn">Выход</button>
 		</form>
 
 		<script>
@@ -69,6 +72,11 @@
 			const dateInput = document.getElementById('date')
 			const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
 			dateInput.min = today // нельзя выбрать дату меньше сегодняшней
+
+			function logout() {
+            document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
+            window.location.href = '/login';
+        	}
 		</script>
 	</body>
 </html>

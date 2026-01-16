@@ -1,0 +1,20 @@
+<h2>Мастера</h2>
+
+<p><a href="/admin" style="color: blue;">Назад к записям</a></p>
+<form method="POST" action="/admin/masters/create">
+    Имя: <input name="name" required><br>
+    Специализация: <input name="specialization"><br>
+    <button>Добавить</button>
+</form>
+
+<hr>
+
+{{range .masters}}
+<div style="border:1px solid #ddd; margin:10px; padding:10px;">
+    {{.Name}} {{if .Specialization}}({{.Specialization}}){{end}}
+    <form method="POST" action="/admin/masters/delete" style="display:inline;">
+        <input type="hidden" name="master_id" value="{{.ID}}">
+        <button onclick="return confirm('Удалить?')">Удалить</button>
+    </form>
+</div>
+{{end}}

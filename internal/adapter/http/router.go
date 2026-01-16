@@ -9,6 +9,9 @@ import (
 // Маршрутизация запрососв
 // Запрос -вызываемая фукнция
 func SetupRoutes(r *gin.Engine) {
+
+	//log.Println("🔧 Роутер настроен")
+
 	r.GET("/login", http.LoginGET)
 	r.POST("/login", http.LoginPOST)
 
@@ -27,4 +30,9 @@ func SetupRoutes(r *gin.Engine) {
 
 	r.GET("/admin-login", http.AdminLoginGET)
 	r.POST("/admin-login", http.AdminLoginPOST)
+
+	r.GET("/admin/masters", http.MastersList)
+	r.POST("/admin/masters/create", http.CreateMaster)
+	r.POST("/admin/masters/delete", http.DeleteMaster)
+
 }

@@ -1,6 +1,7 @@
 package http
 
 import (
+	"GoProject1/internal/application/usecases/masters"
 	"log"
 	"net/http"
 
@@ -16,6 +17,11 @@ func MainGET(c *gin.Context) {
 		return
 	} else {
 		log.Print("Coockie:", cookie)
-		c.HTML(http.StatusOK, "main.html", nil)
+
+		mastersData := masters.UC_GetMasters()
+		c.HTML(http.StatusOK, "main.html", gin.H{
+			"masters": mastersData,
+		})
 	}
+
 }

@@ -6,6 +6,7 @@ import (
 	"log"
 )
 
+// Проверка адпинистратора по логину через запрос к БД
 func A_AdminAuth(login string) (passwordHash string, userID int, isAdmin bool) {
 	query := `SELECT id, password_hash, is_admin FROM users WHERE login = $1`
 	err := db.Pool.QueryRow(context.Background(), query, login).Scan(&userID, &passwordHash, &isAdmin)

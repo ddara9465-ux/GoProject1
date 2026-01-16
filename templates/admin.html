@@ -64,6 +64,10 @@
   </head>
   <body>
     <h2>Админ панель - Управление записями</h2>
+    <p>  
+      <a href="/admin/masters" style="color:blue;"> Мастера</a> 
+    </p>
+
     <p><a href="/">← Вернуться на главную</a></p>
 
     <table>
@@ -118,11 +122,12 @@
                     
                     <!-- Выбор мастера -->
                     <select name="master" class="edit-input">
-                      <option value="Анна" {{if eq .Employee "Анна"}}selected{{end}}>Анна</option>
-                      <option value="Ольга" {{if eq .Employee "Ольга"}}selected{{end}}>Ольга</option>
-                      <option value="Светлана" {{if eq .Employee "Светлана"}}selected{{end}}>Светлана</option>
+                    {{range $.Masters}}
+                    <option value="{{.Name}}">{{.Name}} {{.Specialization}}</option>
+                    {{end}}
                     </select>
-                    
+
+
                     <!-- Выбор услуги -->
                     <select name="service" class="edit-input">
                       <option value="Наращивание" {{if eq .Procedure "Наращивание"}}selected{{end}}>Наращивание</option>
