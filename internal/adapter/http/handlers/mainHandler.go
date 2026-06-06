@@ -2,6 +2,7 @@ package http
 
 import (
 	"GoProject1/internal/application/usecases/masters"
+	"GoProject1/internal/infrastructure/cache"
 	"log"
 	"net/http"
 
@@ -18,7 +19,11 @@ func MainGET(c *gin.Context) {
 	} else {
 		log.Print("Coockie:", cookie)
 
-		mastersData := masters.UC_GetMasters()
+		mastersData := cache.GetMasters()
+		if mastersData == nil || cache.IsExpired() {
+			mastersData = masters.UC_GetMasters()
+			cache.SetMasters(mastersData)
+		}
 		c.HTML(http.StatusOK, "main.html", gin.H{
 			"masters": mastersData,
 		})

@@ -1,20 +1,195 @@
-<h2>Мастера</h2>
-
-<p><a href="/admin" style="color: blue;">Назад к записям</a></p>
-<form method="POST" action="/admin/masters/create">
-    Имя: <input name="name" required><br>
-    Специализация: <input name="specialization"><br>
-    <button>Добавить</button>
-</form>
-
-<hr>
-
-{{range .masters}}
-<div style="border:1px solid #ddd; margin:10px; padding:10px;">
-    {{.Name}} {{if .Specialization}}({{.Specialization}}){{end}}
-    <form method="POST" action="/admin/masters/delete" style="display:inline;">
-        <input type="hidden" name="master_id" value="{{.ID}}">
-        <button onclick="return confirm('Удалить?')">Удалить</button>
-    </form>
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>специалисты | nuance</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&family=Playfair+Display:ital@0;1&display=swap');
+        
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #efe7df;
+            padding: 2rem 1.5rem;
+        }
+        
+        .masters-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+        
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0cfc0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .brand h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 400;
+            color: #3a2c1c;
+        }
+        
+        .brand p {
+            font-size: 11px;
+            color: #b28b65;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        
+        .back-link {
+            color: #8b694a;
+            text-decoration: none;
+            font-size: 13px;
+            font-weight: 500;
+        }
+        
+        .card {
+            background: white;
+            border-radius: 48px;
+            padding: 28px 28px 36px;
+            margin-bottom: 28px;
+            box-shadow: 0 12px 28px -8px rgba(0,0,0,0.08);
+            border: 1px solid #f0e4d8;
+        }
+        
+        .card h2 {
+            font-size: 22px;
+            font-weight: 600;
+            color: #2c2418;
+            margin-bottom: 20px;
+            border-left: 3px solid #c49a6c;
+            padding-left: 12px;
+        }
+        
+        input {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 60px;
+            border: 1px solid #e2cfbc;
+            background: #fefaf5;
+            margin-bottom: 12px;
+            font-family: inherit;
+        }
+        
+        select {
+            width: 100%;
+            padding: 12px 16px;
+            border-radius: 60px;
+            border: 1px solid #e2cfbc;
+            background: #fefaf5;
+            margin-bottom: 12px;
+            font-family: inherit;
+            color: #2c2418;
+        }
+        
+        .btn-primary {
+            background: #2c2418;
+            color: white;
+            border: none;
+            padding: 10px 24px;
+            border-radius: 60px;
+            font-weight: 500;
+            cursor: pointer;
+            width: 100%;
+        }
+        
+        .master-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 14px 0;
+            border-bottom: 1px solid #f0e2d4;
+        }
+        
+        .master-name {
+            font-weight: 500;
+            color: #2c2418;
+            font-size: 16px;
+        }
+        
+        .master-spec {
+            font-size: 12px;
+            color: #a08160;
+            margin-left: 8px;
+            display: inline-block;
+            background: #f5ede5;
+            padding: 2px 10px;
+            border-radius: 30px;
+        }
+        
+        .btn-danger {
+            background: #bc7a5a;
+            border: none;
+            padding: 6px 20px;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            font-size: 12px;
+        }
+        
+        .empty-list {
+            text-align: center;
+            padding: 32px;
+            color: #ad927b;
+        }
+    </style>
+</head>
+<body>
+<div class="masters-container">
+    <div class="header">
+        <div class="brand">
+            <h1>nuance studio</h1>
+            <p>nail & pedi experts</p>
+        </div>
+        <a href="/admin" class="back-link">← назад к записям</a>
+    </div>
+    
+    <div class="card">
+        <h2>➕ добавить мастера</h2>
+        <form method="POST" action="/admin/masters/create">
+            <input type="text" name="name" placeholder="Имя мастера" required>
+            <select name="specialization" required>
+                <option value="">выберите специализацию</option>
+                <option value="Маникюр">Маникюр</option>
+                <option value="Педикюр">Педикюр</option>
+                <option value="Наращивание ногтей">Наращивание ногтей</option>
+                <option value="Маникюр + педикюр">Маникюр + педикюр</option>
+                <option value="Дизайн ногтей">Дизайн ногтей</option>
+            </select>
+            <button type="submit" class="btn-primary">добавить</button>
+        </form>
+    </div>
+    
+    <div class="card">
+        <h2>наши мастера</h2>
+        {{ if .masters }}
+            {{ range .masters }}
+            <div class="master-item">
+                <div>
+                    <span class="master-name">{{ .Name }}</span>
+                    {{ if .Specialization }}
+                        <span class="master-spec">{{ .Specialization }}</span>
+                    {{ end }}
+                </div>
+                <form method="POST" action="/admin/masters/delete" onsubmit="return confirm('Удалить мастера {{ .Name }}?')">
+                    <input type="hidden" name="master_id" value="{{ .ID }}">
+                    <button type="submit" class="btn-danger">удалить</button>
+                </form>
+            </div>
+            {{ end }}
+        {{ else }}
+            <div class="empty-list">пока нет мастеров, добавьте первого</div>
+        {{ end }}
+    </div>
 </div>
-{{end}}
+</body>
+</html>

@@ -17,6 +17,7 @@ func CreateMaster(c *gin.Context) {
 	name := c.PostForm("name")
 	specialization := c.PostForm("specialization")
 	masters.UC_CreateMaster(name, specialization)
+
 	c.Redirect(http.StatusSeeOther, "/admin/masters")
 }
 
@@ -27,6 +28,7 @@ func DeleteMaster(c *gin.Context) {
 		log.Print("Неверный ID мастера")
 		return
 	}
+
 	masters.UC_DeleteMaster(masterID)
 	c.Redirect(http.StatusSeeOther, "/admin/masters")
 }

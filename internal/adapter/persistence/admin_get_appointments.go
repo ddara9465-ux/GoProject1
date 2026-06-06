@@ -18,8 +18,8 @@ type Appointment struct {
 }
 
 // A_GetAllAppointments достаёт все записи + данные клиента (first_name, phone) через JOIN.
-func A_GetAllAppointments() ([]Appointment, error) {
-	rows, err := db.Pool.Query(context.Background(), `
+func A_GetAllAppointments(ctx context.Context) ([]Appointment, error) {
+	rows, err := db.Pool.Query(ctx, `
 		SELECT
 			a.id,
 			a.client_id,

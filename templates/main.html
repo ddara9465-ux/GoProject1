@@ -1,82 +1,289 @@
 <!DOCTYPE html>
 <html lang="ru">
-	<head>
-		<meta charset="UTF-8" />
-		<title>Запрос звонка</title>
-		<style>
-			body {
-				margin: 0;
-				height: 100vh;
-				display: flex;
-				justify-content: center;
-				align-items: center;
-				font-family: sans-serif;
-			}
-
-			form {
-				display: flex;
-				flex-direction: column; /* сверху вниз */
-				gap: 10px;
-				min-width: 280px;
-			}
-		</style>
-	</head>
-	<body>
-		<form action="/create-request-appointments" method="post">
-			<!-- Желаемая дата -->
-			<label for="date">Желаемая дата:</label>
-			<input type="date" id="date" name="date" required />
-
-			<!-- Мастер -->
-			<label for="master">Мастер:</label>
-			<select id="master" name="master" required>
-				<option value="">Выберите мастера</option>
-				{{range .masters}}
-				<option value="{{.Name}}">{{.Name}}{{if .Specialization}} ({{.Specialization}}){{end}}</option>
-				{{end}}
-			</select>
-
-
-			<!-- Услуга -->
-			<label for="service">Услуга:</label>
-			<select id="service" name="service" required>
-				<option value="">Выберите услугу</option>
-				<option value="Наращивание">Наращивание ногтей (1700)</option>
-				<option value="Коррекция наращенных">
-					Коррекция наращённых ногтей (1300)
-				</option>
-				<option value="Маникюр+лак+укрепление">
-					Маникюр+покрытие гель-лак+укрепление (1300)
-				</option>
-			</select>
-
-			<!-- Комментарий к записи -->
-			<label for="comment">Комментарий к записи:</label>
-			<textarea
-				id="comment"
-				name="comment"
-				rows="3"
-				cols="30"
-				placeholder="Пожелания к записи"
-			></textarea>
-
-			<p>Запросить звонок для согласования записи</p>
-
-			<button type="submit">Отправить</button>
-
-			<button type="button" onclick="logout()" class="logout-btn">Выход</button>
-		</form>
-
-		<script>
-			// запретить выбор прошедших дат
-			const dateInput = document.getElementById('date')
-			const today = new Date().toISOString().split('T')[0] // YYYY-MM-DD
-			dateInput.min = today // нельзя выбрать дату меньше сегодняшней
-
-			function logout() {
-            document.cookie = 'user_id=; expires=Thu, 01 Jan 1970 00:00:00 UTC; path=/';
-            window.location.href = '/login';
-        	}
-		</script>
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Запись | nuance studio</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600;14..32,700&family=Playfair+Display:ital@0;1&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #efe7df;
+            min-height: 100vh;
+            padding: 2rem 1rem;
+        }
+        
+        .main-container {
+            max-width: 680px;
+            margin: 0 auto;
+        }
+        
+        .studio-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid #e0cfc0;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .logo h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 400;
+            color: #3a2c1c;
+        }
+        
+        .logo p {
+            font-size: 11px;
+            color: #b28b65;
+            letter-spacing: 1px;
+            margin-top: 4px;
+        }
+        
+        .nav-buttons {
+            display: flex;
+            gap: 0.8rem;
+            align-items: center;
+            flex-wrap: wrap;
+        }
+        
+        .nav-btn {
+            background: none;
+            border: 1.5px solid #dccbbc;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #8b694a;
+            cursor: pointer;
+            transition: all 0.2s;
+            text-decoration: none;
+            display: inline-block;
+        }
+        
+        .nav-btn:hover {
+            background: #2c2418;
+            color: #fef3e4;
+            border-color: #2c2418;
+        }
+        
+        .nav-btn.active {
+            background: #2c2418;
+            color: #fef3e4;
+            border-color: #2c2418;
+        }
+        
+        .logout-btn {
+            background: none;
+            border: 1.5px solid #dccbbc;
+            padding: 8px 20px;
+            border-radius: 40px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #8b694a;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        
+        .logout-btn:hover {
+            background: #2c2418;
+            color: #fef3e4;
+            border-color: #2c2418;
+        }
+        
+        .booking-card {
+            background: white;
+            border-radius: 48px;
+            padding: 32px 28px 40px;
+            box-shadow: 0 12px 28px -8px rgba(0,0,0,0.08);
+            border: 1px solid #f0e4d8;
+        }
+        
+        .booking-card h2 {
+            font-size: 28px;
+            font-weight: 600;
+            color: #2c2418;
+            margin-bottom: 6px;
+        }
+        
+        .booking-card .hint {
+            color: #ad927b;
+            font-size: 14px;
+            margin-bottom: 32px;
+            border-left: 3px solid #c49a6c;
+            padding-left: 12px;
+        }
+        
+        .form-group {
+            margin-bottom: 24px;
+        }
+        
+        label {
+            display: block;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #ad8b66;
+            margin-bottom: 8px;
+            letter-spacing: 0.4px;
+        }
+        
+        input, select, textarea {
+            width: 100%;
+            padding: 13px 16px;
+            background: #fefaf5;
+            border: 1px solid #e6d6c8;
+            border-radius: 32px;
+            font-size: 14px;
+            font-family: 'Inter', monospace;
+            transition: 0.2s;
+        }
+        
+        input:focus, select:focus, textarea:focus {
+            border-color: #c49a6c;
+            outline: none;
+            background: #ffffff;
+            box-shadow: 0 0 0 3px #f5ede5;
+        }
+        
+        textarea {
+            border-radius: 28px;
+            resize: vertical;
+        }
+        
+        .btn-submit {
+            background: #c49a6c;
+            width: 100%;
+            border: none;
+            padding: 14px;
+            border-radius: 44px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            margin-top: 12px;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+        
+        .btn-submit:hover {
+            background: #a87a4e;
+            transform: scale(0.98);
+        }
+        
+        .price-tag {
+            font-size: 11px;
+            color: #c49a6c;
+            margin-top: 4px;
+            display: block;
+        }
+        
+        @media (max-width: 540px) {
+            body {
+                padding: 1rem;
+            }
+            .booking-card {
+                padding: 24px 20px;
+            }
+            .nav-buttons {
+                gap: 0.5rem;
+            }
+            .nav-btn, .logout-btn {
+                padding: 6px 14px;
+                font-size: 11px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="main-container">
+        <div class="studio-header">
+            <div class="logo">
+                <h1>nuance studio</h1>
+                <p>nail & pedi experts</p>
+            </div>
+            <div class="nav-buttons">
+                <a href="/about" class="nav-btn">✨ о нас</a>
+                <a href="/" class="nav-btn active">📅 записаться</a>
+                <form method="POST" action="/logout" style="margin:0;">
+                    <button type="submit" class="logout-btn">выйти</button>
+                </form>
+            </div>
+        </div>
+        
+        <div class="booking-card">
+            <h2>выбрать услугу</h2>
+            <div class="hint">заполните форму, мастер свяжется с вами</div>
+            
+            <form action="/create-request-appointments" method="post">
+                <div class="form-group">
+                    <label>желаемая дата</label>
+                    <input type="date" name="date" id="date" required>
+                </div>
+                
+                <div class="form-group">
+                    <label>мастер</label>
+                    <select name="master" required>
+                        <option value="">выберите специалиста</option>
+                        {{range .masters}}
+                        <option value="{{.Name}}">{{.Name}} — {{.Specialization}}</option>
+                        {{end}}
+                    </select>
+                </div>
+                
+                <div class="form-group">
+                    <label>услуга</label>
+                    <select name="service" required>
+                        <option value="">выберите процедуру</option>
+                        <option value="Маникюр классический">Маникюр классический — 1200 ₽</option>
+                        <option value="Маникюр аппаратный">Маникюр аппаратный — 1300 ₽</option>
+                        <option value="Маникюр комбинированный">Маникюр комбинированный — 1400 ₽</option>
+                        <option value="Педикюр классический">Педикюр классический — 1800 ₽</option>
+                        <option value="Педикюр аппаратный">Педикюр аппаратный — 2000 ₽</option>
+                        <option value="Педикюр медицинский">Педикюр медицинский — 2500 ₽</option>
+                        <option value="Наращивание ногтей (гель)">Наращивание гелем — 2500 ₽</option>
+                        <option value="Наращивание ногтей (акрил)">Наращивание акрилом — 2300 ₽</option>
+                        <option value="Коррекция наращенных">Коррекция наращённых — 1500 ₽</option>
+                        <option value="Снятие наращенных">Снятие наращённых — 800 ₽</option>
+                        <option value="Маникюр + педикюр (комплекс)">Маникюр + педикюр — 2800 ₽</option>
+                        <option value="Дизайн ногтей (роспись)">Дизайн ногтей — от 500 ₽</option>
+                        <option value="Покрытие гель-лак">Покрытие гель-лак — 1000 ₽</option>
+                        <option value="Укрепление ногтей (биогель)">Укрепление биогелем — 800 ₽</option>
+                        <option value="Парафинотерапия">Парафинотерапия — 700 ₽</option>
+                        <option value="SPA-уход для рук/ног">SPA-уход — 1200 ₽</option>
+                    </select>
+                    <span class="price-tag">* окончательная стоимость уточняется после консультации</span>
+                </div>
+                
+                <div class="form-group">
+                    <label>комментарий</label>
+                    <textarea name="comment" rows="3" placeholder="пожелания, удобное время, аллергии..."></textarea>
+                </div>
+                
+                <button type="submit" class="btn-submit">
+                    <span>📞</span> отправить заявку
+                </button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        const dateInput = document.getElementById('date');
+        const today = new Date().toISOString().split('T')[0];
+        dateInput.min = today;
+    </script>
+</body>
 </html>

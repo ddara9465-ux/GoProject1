@@ -31,3 +31,11 @@ func LoginPOST(c *gin.Context) {
 
 	}
 }
+
+// LogoutPOST - выход из системы (удаляет куки)
+func LogoutPOST(c *gin.Context) {
+	// Удаляем куки, устанавливая expiry в прошлое время
+	c.SetCookie("user_id", "", -1, "/", "", false, true)
+	c.SetCookie("isAdmin", "", -1, "/", "", false, true)
+	c.Redirect(http.StatusSeeOther, "/login")
+}

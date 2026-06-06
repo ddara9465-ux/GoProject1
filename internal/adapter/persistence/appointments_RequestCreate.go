@@ -3,7 +3,6 @@ package persistence
 import (
 	"GoProject1/internal/infrastructure/db"
 	"context"
-	"log"
 )
 
 // GetClientIDByUserID ищет id клиента по user_id.
@@ -21,22 +20,16 @@ func GetClientIDByUserID(ctx context.Context, userID int) (int, error) {
 }
 
 // A_CreateRequestAppointments создаёт запись в appointments со статусом "Запрос звонка".
-func A_CreateRequestAppointments(date, employee, procedure, notes string, userID int) {
-	status := "Запрос звонка"
-	ctx := context.Background()
-
+func A_CreateRequestAppointments(ctx context.Context, date, employee, procedure, notes string, userID int) error {
 	clientID, err := GetClientIDByUserID(ctx, userID)
 	if err != nil {
-		log.Fatal("Не найден client_id для user_id:", userID, "ошибка:", err)
+		return err
 	}
 
-	_, err = db.Pool.Exec(
-		ctx,
+	_, err = db.Pool.Exec(ctx,
 		`INSERT INTO appointments (client_id, procedure, employee, appointment_date, status, notes)
          VALUES ($1, $2, $3, $4, $5, $6)`,
-		clientID, procedure, employee, date, status, notes,
-	)
-	if err != nil {
-		log.Fatal("Ошибка при создании запроса записи:", err)
-	}
+		clientID, procedure, employee, date, "Запрос звонка", notes)
+
+	return err
 }

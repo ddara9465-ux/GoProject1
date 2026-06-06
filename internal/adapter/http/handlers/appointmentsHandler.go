@@ -2,6 +2,7 @@ package http
 
 import (
 	"GoProject1/internal/application/usecases/appointments"
+	"GoProject1/internal/infrastructure/telegram"
 	"log"
 	"net/http"
 	"strconv"
@@ -30,7 +31,14 @@ func CreateRequestAppointments(c *gin.Context) {
 	procedure := c.PostForm("service")
 	notes := c.PostForm("comment")
 
+	//Берем контекст
+	ctx := c.Request.Context()
+
 	// Передаём данные в слой usecases
-	appointments.UC_CreateRequestAppointments(date, employee, procedure, notes, userID)
+	appointments.UC_CreateRequestAppointments(ctx, date, employee, procedure, notes, userID)
+
+	// Отправляем уведомление в Telegram
+	go telegram.SendNewAppointmentNotify(userID, date, employee, procedure)
+
 	c.Redirect(http.StatusSeeOther, "/")
 }

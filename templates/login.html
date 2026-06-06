@@ -1,47 +1,192 @@
 <!DOCTYPE html>
 <html lang="ru">
-	<head>
-		<meta charset="utf-8" />
-		<meta name="viewport" content="width=device-width, initial-scale=1" />
-		<title>Вход</title>
-	</head>
-	<body>
-		<div style="text-align: center; margin: 20px 0;">
-			<a href="/admin-login" style="
-				display: inline-block;
-				background: #c9c9c8;
-				color: rgb(0, 0, 0);
-				padding: 10px 20px;
-				text-decoration: none;
-				border-radius: 5px;
-				font-weight: bold;
-				margin-bottom: 20px;
-			"> Вход для администраторов</a>
-		</div>
-
-		<h1>Вход для клиентов</h1>
-		{{if .Error}}
-		<div style="color: red">{{.Error}}</div>
-		{{end}}
-		<form method="post" action="/login">
-			<label>
-				Логин (email):
-				<input type="email" name="login" required autocomplete="username" />
-			</label>
-
-			<label>
-				Пароль:
-				<input
-					type="password"
-					name="password"
-					required
-					autocomplete="current-password"
-				/>
-			</label>
-
-			<button type="submit">Войти</button>
-		</form>
-
-		<p>Нет аккаунта? <a href="/register">Зарегистрироваться</a></p>
-	</body>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Клиентский вход | Салон</title>
+    <style>
+        @import url('https://fonts.googleapis.com/css2?family=Inter:opsz,wght@14..32,300;14..32,400;14..32,500;14..32,600&family=Playfair+Display:ital@0;1&display=swap');
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Inter', sans-serif;
+            background: #f1ede8;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .client-card {
+            background: #ffffffef;
+            backdrop-filter: blur(4px);
+            border-radius: 56px;
+            width: 520px;
+            max-width: 100%;
+            padding: 42px 36px 48px;
+            box-shadow: 0 30px 50px -25px rgba(0,0,0,0.2);
+            border: 1px solid #ece1d4;
+        }
+        
+        .brand {
+            display: flex;
+            justify-content: space-between;
+            align-items: flex-end;
+            margin-bottom: 32px;
+            padding-bottom: 16px;
+            border-bottom: 2px dotted #e2cfbc;
+        }
+        
+        .brand h1 {
+            font-family: 'Playfair Display', serif;
+            font-size: 28px;
+            font-weight: 400;
+            color: #3a2c1c;
+            letter-spacing: -0.2px;
+        }
+        
+        .brand span {
+            font-size: 38px;
+        }
+        
+        .admin-badge {
+            background: #ede3d7;
+            border-radius: 60px;
+            padding: 6px 14px;
+            font-size: 12px;
+            font-weight: 600;
+            color: #7e6142;
+            display: inline-block;
+            margin-bottom: 24px;
+        }
+        
+        h2 {
+            font-size: 26px;
+            font-weight: 600;
+            color: #2c2418;
+            margin-bottom: 8px;
+        }
+        
+        .greeting {
+            color: #8e795e;
+            margin-bottom: 32px;
+            font-size: 14px;
+        }
+        
+        .input-field {
+            margin-bottom: 24px;
+        }
+        
+        .input-field label {
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            color: #ad8b66;
+            display: block;
+            margin-bottom: 8px;
+            letter-spacing: 0.5px;
+        }
+        
+        .input-field input {
+            width: 100%;
+            background: #fefaf5;
+            border: 1px solid #e6d6c8;
+            padding: 14px 18px;
+            border-radius: 36px;
+            font-size: 15px;
+            transition: 0.2s;
+        }
+        
+        .input-field input:focus {
+            border-color: #c6a27a;
+            outline: none;
+            background: white;
+            box-shadow: 0 0 0 3px #f3ebe2;
+        }
+        
+        .btn-login {
+            background: #c49a6c;
+            width: 100%;
+            border: none;
+            padding: 14px;
+            border-radius: 60px;
+            font-weight: 700;
+            font-size: 16px;
+            color: white;
+            cursor: pointer;
+            transition: 0.2s;
+            margin-top: 8px;
+        }
+        
+        .btn-login:hover {
+            background: #aa7a4a;
+            transform: scale(0.98);
+        }
+        
+        .register-row {
+            text-align: center;
+            margin-top: 28px;
+            font-size: 14px;
+            color: #836e52;
+        }
+        
+        .register-row a {
+            color: #c49a6c;
+            font-weight: 600;
+            text-decoration: none;
+            margin-left: 8px;
+        }
+        
+        .register-row a:hover {
+            text-decoration: underline;
+        }
+        
+        .error {
+            background: #ffefe8;
+            border-radius: 40px;
+            padding: 12px 18px;
+            margin-bottom: 24px;
+            font-size: 13px;
+            color: #c2502c;
+        }
+    </style>
+</head>
+<body>
+    <div class="client-card">
+        <div class="brand">
+            <h1>nuance<br>studio</h1>
+            <span>✧</span>
+        </div>
+        <div class="admin-badge">● ДЛЯ ГОСТЕЙ</div>
+        <h2>вход в профиль</h2>
+        <div class="greeting">добро пожаловать, используйте email и пароль</div>
+        
+        {{if .Error}}
+        <div class="error">{{.Error}}</div>
+        {{end}}
+        
+        <form method="post" action="/login">
+            <div class="input-field">
+                <label>электронная почта</label>
+                <input type="email" name="login" placeholder="hello@example.com" autocomplete="username">
+            </div>
+            <div class="input-field">
+                <label>пароль</label>
+                <input type="password" name="password" placeholder="··········">
+            </div>
+            <button type="submit" class="btn-login">войти →</button>
+        </form>
+        
+        <div class="register-row">
+            нет аккаунта?
+            <a href="/register">зарегистрироваться</a>
+        </div>
+    </div>
+</body>
 </html>

@@ -20,9 +20,12 @@ func AdminMain(c *gin.Context) {
 	//Есть - открываем
 
 	//  Получаем данные и показываем страницу
-	apps := admin.UC_getAppointments()
+	ctx := c.Request.Context()
+	apps := admin.UC_getAppointments(ctx)
+
 	mastersData := masters.UC_GetMasters()
-	c.HTML(http.StatusOK, "admin.tmpl", gin.H{
+
+	c.HTML(http.StatusOK, "admin.html", gin.H{
 		"Appointments": apps,
 		"Masters":      mastersData,
 	})

@@ -1,11 +1,15 @@
 package main
 
 import (
-	"GoProject1/internal/adapter/http"
+	myhttp "GoProject1/internal/adapter/http"
 	"GoProject1/internal/infrastructure/db"
 	"context"
 	"log"
+	"net/http"
 	"os"
+	"os/signal"
+	"syscall"
+	"time"
 
 	"github.com/gin-gonic/gin"
 	"github.com/joho/godotenv"
@@ -31,11 +35,39 @@ func main() {
 
 	//З А П У С К  С А Й Т А
 	log.Print("Запуск сервера")
-	r := gin.Default()            // Создаем новый экземпляр
+	r := gin.Default() // Создаем новый экземпляр
+	r.Static("/static", "./static")
 	r.LoadHTMLGlob("templates/*") // страницы HTML
-	http.SetupRoutes(r)           // роутеры(маршруты)
+	myhttp.SetupRoutes(r)         // роутеры(маршруты)
 
-	// Запускаем сервер на порту 8080
-	log.Print("Запуск сервера на http://localhost:8080")
-	r.Run(":8080")
+	//Graceful Shutdown
+	srv := &http.Server{
+		Addr:    ":8080",
+		Handler: r,
+	}
+
+	//Запускаем сервер в горутине
+	go func() {
+		log.Print(" Сервер запущен на http://localhost:8080")
+		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
+			log.Fatalf("Ошибка: %v", err)
+		}
+	}()
+
+	//Ждем сигнал выключения
+	quit := make(chan os.Signal, 1)
+	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
+	<-quit
+
+	log.Print("Получен сигнал выключения.Завершаем работу...")
+
+	//Даем 5 секунд на завершение текущих запросов
+	ctxShutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
+	defer cancel()
+
+	if err := srv.Shutdown(ctxShutdown); err != nil {
+		log.Fatal("Ошибка при выключении:", err)
+	}
+
+	log.Print("Сервер корректно завершил работу")
 }
