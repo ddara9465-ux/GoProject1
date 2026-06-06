@@ -5,33 +5,39 @@ import (
 	"time"
 )
 
-// Структура кеша с мьютексом
 type MastersCache struct {
 	data      []map[string]interface{}
 	mu        sync.RWMutex
 	updatedAt time.Time
 }
 
-var cache = &MastersCache{}
-
-// GetMasters - читаем из кеша (много читателей могут одновременно)
-func GetMasters() []map[string]interface{} {
-	cache.mu.RLock()         // Блокировка для чтения
-	defer cache.mu.RUnlock() // Освобождаем
-	return cache.data
+func NewMastersCache() *MastersCache {
+	return &MastersCache{}
 }
 
-// SetMasters - записываем в кеш (только один писатель)
-func SetMasters(data []map[string]interface{}) {
-	cache.mu.Lock()         // Эксклюзивная блокировка
-	defer cache.mu.Unlock() // Освобождаем
-	cache.data = data
-	cache.updatedAt = time.Now()
+func (c *MastersCache) GetMasters() []map[string]interface{} {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return c.data
 }
 
-// IsExpired - проверяем, не устарел ли кеш (5 минут)
-func IsExpired() bool {
-	cache.mu.RLock()
-	defer cache.mu.RUnlock()
-	return time.Since(cache.updatedAt) > 5*time.Minute
+func (c *MastersCache) SetMasters(data []map[string]interface{}) {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.data = data
+	c.updatedAt = time.Now()
+}
+
+func (c *MastersCache) IsExpired() bool {
+	c.mu.RLock()
+	defer c.mu.RUnlock()
+	return time.Since(c.updatedAt) > 5*time.Minute
+}
+
+// Invalidate очищает кеш (принудительное обновление)
+func (c *MastersCache) Invalidate() {
+	c.mu.Lock()
+	defer c.mu.Unlock()
+	c.data = nil
+	c.updatedAt = time.Time{} // обнуляем время, чтобы кеш считался устаревшим
 }

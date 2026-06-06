@@ -8,17 +8,24 @@ import (
 	"golang.org/x/crypto/bcrypt"
 )
 
-// UC_Login — логин: (userID, true) если ок, иначе (0, false).
-func UC_Login(login string, password string) (int, bool) {
-	// Берём хеш пароля и id по логину.
-	trueHashPassword, userID, err := persistence.A_GetPasswordHash_User(context.Background(), login)
+type AuthService struct {
+	repo *persistence.Repository
+}
+
+// NewAuthService создаёт новый сервис аутентификации
+func NewAuthService(repo *persistence.Repository) *AuthService {
+	return &AuthService{repo: repo}
+}
+
+// Login - логин: (userID, true) если ок, иначе (0, false)
+func (s *AuthService) Login(ctx context.Context, login, password string) (int, bool) {
+	trueHashPassword, userID, err := s.repo.GetPasswordHashByLogin(ctx, login)
+
 	if err != nil {
-		// Ошибка БД/пользователь не найден.
 		log.Printf("Log err: %v", err)
 		return 0, false
 	}
 
-	// Проверяем пароль через шифрование bcrypt: nil = пароль подошёл, error = не подошёл/хеш битый.
 	err = bcrypt.CompareHashAndPassword([]byte(trueHashPassword), []byte(password))
 	if err != nil {
 		log.Printf("Login func | Неверный пароль для пользователя login=%v", login)

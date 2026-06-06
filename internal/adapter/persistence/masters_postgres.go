@@ -1,24 +1,26 @@
 package persistence
 
 import (
-	"GoProject1/internal/infrastructure/db"
 	"context"
 	"log"
 )
 
-func A_CreateMaster(name, specialization string) {
-	ctx := context.Background()
-	_, err := db.Pool.Exec(ctx, `INSERT INTO masters (name, specialization) VALUES ($1, $2)`, name, specialization)
+// CreateMaster создаёт нового мастера
+func (r *Repository) CreateMaster(ctx context.Context, name, specialization string) error {
+	_, err := r.DB.Pool.Exec(ctx, `INSERT INTO masters (name, specialization) VALUES ($1, $2)`, name, specialization)
 	if err != nil {
-		log.Fatal("Ошибка создания мастера:", err)
+		log.Printf("Ошибка создания мастера: %v", err)
+		return err
 	}
+	return nil
 }
 
-func A_GetMasters() []map[string]interface{} {
-	ctx := context.Background()
-	rows, err := db.Pool.Query(ctx, `SELECT id, name, specialization FROM masters`)
+// GetMasters возвращает список мастеров
+func (r *Repository) GetMasters(ctx context.Context) ([]map[string]interface{}, error) {
+	rows, err := r.DB.Pool.Query(ctx, `SELECT id, name, specialization FROM masters`)
 	if err != nil {
-		log.Fatal("Ошибка получения мастеров:", err)
+		log.Printf("Ошибка получения мастеров: %v", err)
+		return nil, err
 	}
 	defer rows.Close()
 
@@ -27,7 +29,7 @@ func A_GetMasters() []map[string]interface{} {
 		var id int
 		var name, specialization string
 		if err := rows.Scan(&id, &name, &specialization); err != nil {
-			log.Fatal("Ошибка Scan мастера:", err)
+			log.Printf("Ошибка Scan мастера: %v", err)
 			continue
 		}
 		masters = append(masters, map[string]interface{}{
@@ -36,13 +38,16 @@ func A_GetMasters() []map[string]interface{} {
 			"Specialization": specialization,
 		})
 	}
-	return masters
+
+	return masters, nil
 }
 
-func A_DeleteMaster(masterID int) {
-	ctx := context.Background()
-	_, err := db.Pool.Exec(ctx, `DELETE FROM masters WHERE id = $1`, masterID)
+// DeleteMaster удаляет мастера по ID
+func (r *Repository) DeleteMaster(ctx context.Context, masterID int) error {
+	_, err := r.DB.Pool.Exec(ctx, `DELETE FROM masters WHERE id = $1`, masterID)
 	if err != nil {
-		log.Fatal("Ошибка удаления мастера:", err)
+		log.Printf("Ошибка удаления мастера: %v", err)
+		return err
 	}
+	return nil
 }

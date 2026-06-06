@@ -1,9 +1,8 @@
 package admin
 
-import "GoProject1/internal/adapter/persistence"
+import "context"
 
-// UC_UpdateAppointmentDetails обновляет запись
-func UC_UpdateAppointmentDetails(appointmentID int, date, master, service string) error {
-	err := persistence.A_UpdateAppointmentDetails(appointmentID, date, master, service)
-	return err
+// UpdateAppointmentDetails обновляет запись
+func (s *AdminService) UpdateAppointmentDetails(ctx context.Context, appointmentID int, date, master, service string) error {
+	return s.repo.UpdateAppointmentDetails(ctx, appointmentID, date, master, service)
 }

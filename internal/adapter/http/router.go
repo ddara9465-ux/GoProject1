@@ -1,41 +1,66 @@
 package http
 
 import (
-	http "GoProject1/internal/adapter/http/handlers"
+	adminHandlers "GoProject1/internal/adapter/http/handlers"
 
 	"github.com/gin-gonic/gin"
 )
 
-// Маршрутизация запрососв
-// Запрос -вызываемая фукнция
-func SetupRoutes(r *gin.Engine) {
+type Router struct {
+	aboutHandler             *adminHandlers.AboutHandler
+	mainHandler              *adminHandlers.MainHandler
+	loginHandler             *adminHandlers.LoginHandler
+	registerHandler          *adminHandlers.RegisterHandler
+	adminAuthHandler         *adminHandlers.AdminAuthHandler
+	adminHandler             *adminHandlers.AdminHandler
+	adminAppointmentsHandler *adminHandlers.AdminAppointmentsHandler
+	appointmentsHandler      *adminHandlers.AppointmentsHandler
+	mastersHandler           *adminHandlers.MastersHandler
+}
 
-	//log.Println("🔧 Роутер настроен")
+func NewRouter(
+	aboutHandler *adminHandlers.AboutHandler,
+	mainHandler *adminHandlers.MainHandler,
+	loginHandler *adminHandlers.LoginHandler,
+	registerHandler *adminHandlers.RegisterHandler,
+	adminAuthHandler *adminHandlers.AdminAuthHandler,
+	adminHandler *adminHandlers.AdminHandler,
+	adminAppointmentsHandler *adminHandlers.AdminAppointmentsHandler,
+	appointmentsHandler *adminHandlers.AppointmentsHandler,
+	mastersHandler *adminHandlers.MastersHandler, // уже принимает кеш внутри
+) *Router {
+	return &Router{
+		aboutHandler:             aboutHandler,
+		mainHandler:              mainHandler,
+		loginHandler:             loginHandler,
+		registerHandler:          registerHandler,
+		adminAuthHandler:         adminAuthHandler,
+		adminHandler:             adminHandler,
+		adminAppointmentsHandler: adminAppointmentsHandler,
+		appointmentsHandler:      appointmentsHandler,
+		mastersHandler:           mastersHandler,
+	}
+}
 
-	r.GET("/login", http.LoginGET)
-	r.POST("/login", http.LoginPOST)
+func (r *Router) SetupRoutes(engine *gin.Engine) {
+	// Клиентские маршруты
+	engine.GET("/login", r.loginHandler.LoginGET)
+	engine.POST("/login", r.loginHandler.LoginPOST)
+	engine.GET("/register", r.registerHandler.RegisterGET)
+	engine.POST("/register", r.registerHandler.RegisterPOST)
+	engine.GET("/", r.mainHandler.MainGET)
+	engine.POST("/create-request-appointments", r.appointmentsHandler.CreateRequestAppointments)
+	engine.GET("/about", r.aboutHandler.AboutGET)
+	engine.POST("/logout", r.loginHandler.LogoutPOST)
 
-	r.GET("/register", http.RegisterGET)
-	r.POST("/register", http.RegisterPOST)
-
-	r.GET("/", http.MainGET)
-	r.POST("/create-request-appointments", http.CreateRequestAppointments)
-
-	r.GET("/about", http.AboutGET)
-	r.POST("/logout", http.LogoutPOST)
-
-	r.GET("/admin", http.AdminMain)
-	r.POST("/admin/appointments/status", http.AdminUpdateAppointmentStatus)
-
-	r.POST("/admin/appointments/delete", http.AppointmentDelete)
-
-	r.POST("/admin/appointments/edit-details", http.AdminEditDetails)
-
-	r.GET("/admin-login", http.AdminLoginGET)
-	r.POST("/admin-login", http.AdminLoginPOST)
-
-	r.GET("/admin/masters", http.MastersList)
-	r.POST("/admin/masters/create", http.CreateMaster)
-	r.POST("/admin/masters/delete", http.DeleteMaster)
-
+	// Админские маршруты
+	engine.GET("/admin", r.adminHandler.AdminMain)
+	engine.POST("/admin/appointments/status", r.adminAppointmentsHandler.AdminUpdateAppointmentStatus)
+	engine.POST("/admin/appointments/delete", r.adminAppointmentsHandler.AppointmentDelete)
+	engine.POST("/admin/appointments/edit-details", r.adminAppointmentsHandler.AdminEditDetails)
+	engine.GET("/admin-login", r.adminAuthHandler.AdminLoginGET)
+	engine.POST("/admin-login", r.adminAuthHandler.AdminLoginPOST)
+	engine.GET("/admin/masters", r.mastersHandler.MastersList)
+	engine.POST("/admin/masters/create", r.mastersHandler.CreateMaster)
+	engine.POST("/admin/masters/delete", r.mastersHandler.DeleteMaster)
 }

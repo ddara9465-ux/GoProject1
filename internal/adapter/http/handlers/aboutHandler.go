@@ -7,15 +7,22 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-func AboutGET(c *gin.Context) {
+type AboutHandler struct {
+	masterService *masters.MasterService
+}
+
+func NewAboutHandler(masterService *masters.MasterService) *AboutHandler {
+	return &AboutHandler{masterService: masterService}
+}
+
+func (h *AboutHandler) AboutGET(c *gin.Context) {
 	_, err := c.Cookie("user_id")
 	if err != nil {
 		c.Redirect(http.StatusSeeOther, "/login")
 		return
 	}
 
-	mastersData := masters.UC_GetMasters()
-
+	mastersData, _ := h.masterService.GetMasters(c.Request.Context())
 	c.HTML(http.StatusOK, "about.html", gin.H{
 		"masters": mastersData,
 	})

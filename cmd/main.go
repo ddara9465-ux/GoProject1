@@ -2,6 +2,13 @@ package main
 
 import (
 	myhttp "GoProject1/internal/adapter/http"
+	adminHandlers "GoProject1/internal/adapter/http/handlers"
+	"GoProject1/internal/adapter/persistence"
+	"GoProject1/internal/application/usecases/admin"
+	"GoProject1/internal/application/usecases/appointments"
+	"GoProject1/internal/application/usecases/auth"
+	"GoProject1/internal/application/usecases/masters"
+	"GoProject1/internal/infrastructure/cache"
 	"GoProject1/internal/infrastructure/db"
 	"context"
 	"log"
@@ -16,52 +23,85 @@ import (
 )
 
 func main() {
-	_ = godotenv.Load() // ищет .env в текущей рабочей директории (PWD)
+	_ = godotenv.Load()
+
 	ctx := context.Background()
 
-	// Б А З А  Д А Н Н Ы Х
 	log.Print("Подключение к БД")
-	dsn := os.Getenv("PG_DSN") //читаем строку коннекта к БД из файла конфигурации окружения (.env)
+	dsn := os.Getenv("PG_DSN")
 	if dsn == "" {
 		log.Fatal("PG_DSN is empty")
 	}
 
-	err := db.InitPostgresPool(ctx, dsn) // пул соединений БД
+	database, err := db.NewDB(ctx, dsn)
 	if err != nil {
 		log.Fatal(err)
-	} else {
-		log.Print("Успешное подключение к БД")
 	}
+	defer database.Close()
+	log.Print("Успешное подключение к БД")
 
-	//З А П У С К  С А Й Т А
+	// Репозиторий
+	repo := persistence.NewRepository(database)
+
+	// Сервисы
+	masterService := masters.NewMasterService(repo)
+	authService := auth.NewAuthService(repo)
+	adminService := admin.NewAdminService(repo)
+	appointmentService := appointments.NewAppointmentService(repo)
+
+	// Кеш
+	mastersCache := cache.NewMastersCache()
+
+	// Handlers
+	aboutHandler := adminHandlers.NewAboutHandler(masterService)
+	mainHandler := adminHandlers.NewMainHandler(masterService, mastersCache)
+	loginHandler := adminHandlers.NewLoginHandler(authService)
+	registerHandler := adminHandlers.NewRegisterHandler(authService)
+	adminAuthHandler := adminHandlers.NewAdminAuthHandler(authService)
+	adminPageHandler := adminHandlers.NewAdminHandler(adminService, masterService)
+	adminAppointmentsHandler := adminHandlers.NewAdminAppointmentsHandler(adminService)
+	appointmentsPageHandler := adminHandlers.NewAppointmentsHandler(appointmentService)
+
+	// Передаём кеш в MastersHandler
+	mastersPageHandler := adminHandlers.NewMastersHandler(masterService, mastersCache)
+
+	// Роутер
+	router := myhttp.NewRouter(
+		aboutHandler,
+		mainHandler,
+		loginHandler,
+		registerHandler,
+		adminAuthHandler,
+		adminPageHandler,
+		adminAppointmentsHandler,
+		appointmentsPageHandler,
+		mastersPageHandler,
+	)
+
 	log.Print("Запуск сервера")
-	r := gin.Default() // Создаем новый экземпляр
-	r.Static("/static", "./static")
-	r.LoadHTMLGlob("templates/*") // страницы HTML
-	myhttp.SetupRoutes(r)         // роутеры(маршруты)
+	r := gin.Default()
+	r.LoadHTMLGlob("templates/*")
 
-	//Graceful Shutdown
+	router.SetupRoutes(r)
+
 	srv := &http.Server{
 		Addr:    ":8080",
 		Handler: r,
 	}
 
-	//Запускаем сервер в горутине
 	go func() {
-		log.Print(" Сервер запущен на http://localhost:8080")
+		log.Print("Сервер запущен на http://localhost:8080")
 		if err := srv.ListenAndServe(); err != nil && err != http.ErrServerClosed {
 			log.Fatalf("Ошибка: %v", err)
 		}
 	}()
 
-	//Ждем сигнал выключения
 	quit := make(chan os.Signal, 1)
 	signal.Notify(quit, os.Interrupt, syscall.SIGTERM)
 	<-quit
 
-	log.Print("Получен сигнал выключения.Завершаем работу...")
+	log.Print("Получен сигнал выключения. Завершаем работу...")
 
-	//Даем 5 секунд на завершение текущих запросов
 	ctxShutdown, cancel := context.WithTimeout(context.Background(), 5*time.Second)
 	defer cancel()
 

@@ -2,17 +2,25 @@ package admin
 
 import (
 	"GoProject1/internal/adapter/persistence"
+	"context"
 	"log"
-
-	"golang.org/x/net/context"
 )
 
-// UC_getAppointments получает список записей для админки (если ошибка — возвращаем пустой слайс).
-func UC_getAppointments(ctx context.Context) []persistence.Appointment {
-	apps, err := persistence.A_GetAllAppointments(ctx)
+type AdminService struct {
+	repo *persistence.Repository
+}
+
+// NewAdminService создаёт новый сервис администратора
+func NewAdminService(repo *persistence.Repository) *AdminService {
+	return &AdminService{repo: repo}
+}
+
+// GetAppointments получает список записей для админки
+func (s *AdminService) GetAppointments(ctx context.Context) []persistence.Appointment {
+	apps, err := s.repo.GetAllAppointments(ctx)
 	if err != nil {
-		log.Printf("UC_getAppointments error: %v", err)
-		return nil // nil-слайс норм, len(nil) == 0
+		log.Printf("GetAppointments error: %v", err)
+		return nil
 	}
 	return apps
 }

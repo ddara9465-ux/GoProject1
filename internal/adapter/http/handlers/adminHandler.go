@@ -8,22 +8,28 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// Admin — страница админки
-func AdminMain(c *gin.Context) {
-	//Ищем есть ли кук админа
+type AdminHandler struct {
+	adminService  *admin.AdminService
+	masterService *masters.MasterService
+}
+
+func NewAdminHandler(adminService *admin.AdminService, masterService *masters.MasterService) *AdminHandler {
+	return &AdminHandler{
+		adminService:  adminService,
+		masterService: masterService,
+	}
+}
+
+func (h *AdminHandler) AdminMain(c *gin.Context) {
 	_, err := c.Cookie("isAdmin")
 	if err != nil {
-		//Если нет - направляем на главную
 		c.Redirect(http.StatusSeeOther, "/")
 		return
 	}
-	//Есть - открываем
 
-	//  Получаем данные и показываем страницу
 	ctx := c.Request.Context()
-	apps := admin.UC_getAppointments(ctx)
-
-	mastersData := masters.UC_GetMasters()
+	apps := h.adminService.GetAppointments(ctx)
+	mastersData, _ := h.masterService.GetMasters(ctx)
 
 	c.HTML(http.StatusOK, "admin.html", gin.H{
 		"Appointments": apps,

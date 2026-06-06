@@ -9,24 +9,34 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// показать главную страницу, если уже прошли аутентификацию
-func MainGET(c *gin.Context) {
-	//проверяем кук входа, если нет - перенаправляет на /login
+type MainHandler struct {
+	masterService *masters.MasterService
+	mastersCache  *cache.MastersCache
+}
+
+func NewMainHandler(masterService *masters.MasterService, mastersCache *cache.MastersCache) *MainHandler {
+	return &MainHandler{
+		masterService: masterService,
+		mastersCache:  mastersCache,
+	}
+}
+
+func (h *MainHandler) MainGET(c *gin.Context) {
 	cookie, err := c.Cookie("user_id")
 	if err != nil {
 		c.Redirect(http.StatusSeeOther, "/login")
 		return
-	} else {
-		log.Print("Coockie:", cookie)
-
-		mastersData := cache.GetMasters()
-		if mastersData == nil || cache.IsExpired() {
-			mastersData = masters.UC_GetMasters()
-			cache.SetMasters(mastersData)
-		}
-		c.HTML(http.StatusOK, "main.html", gin.H{
-			"masters": mastersData,
-		})
 	}
 
+	log.Print("Cookie:", cookie)
+
+	mastersData := h.mastersCache.GetMasters()
+	if mastersData == nil || h.mastersCache.IsExpired() {
+		mastersData, _ = h.masterService.GetMasters(c.Request.Context())
+		h.mastersCache.SetMasters(mastersData)
+	}
+
+	c.HTML(http.StatusOK, "main.html", gin.H{
+		"masters": mastersData,
+	})
 }

@@ -10,34 +10,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// CreateRequestAppointments — создаёт запись на услугу (данные берём из формы + user_id из cookie).
-func CreateRequestAppointments(c *gin.Context) {
-	// Достаём user_id из cookie, без него не понимаем, какой клиент создаёт запись.
+type AppointmentsHandler struct {
+	appointmentService *appointments.AppointmentService
+}
+
+func NewAppointmentsHandler(appointmentService *appointments.AppointmentService) *AppointmentsHandler {
+	return &AppointmentsHandler{appointmentService: appointmentService}
+}
+
+func (h *AppointmentsHandler) CreateRequestAppointments(c *gin.Context) {
 	userIDStr, err := c.Cookie("user_id")
 	if err != nil {
 		log.Print("Нет кука user_id")
 		return
 	}
 
-	// user_id в cookie строкой, переводим в int для usecase/БД.
 	userID, err := strconv.Atoi(userIDStr)
 	if err != nil {
 		return
 	}
 
-	// Читаем поля формы
 	date := c.PostForm("date")
 	employee := c.PostForm("master")
 	procedure := c.PostForm("service")
 	notes := c.PostForm("comment")
 
-	//Берем контекст
 	ctx := c.Request.Context()
 
-	// Передаём данные в слой usecases
-	appointments.UC_CreateRequestAppointments(ctx, date, employee, procedure, notes, userID)
+	h.appointmentService.CreateRequestAppointments(ctx, date, employee, procedure, notes, userID)
 
-	// Отправляем уведомление в Telegram
 	go telegram.SendNewAppointmentNotify(userID, date, employee, procedure)
 
 	c.Redirect(http.StatusSeeOther, "/")

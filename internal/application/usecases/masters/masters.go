@@ -5,33 +5,23 @@ import (
 	"context"
 )
 
-func UC_CreateMaster(name, specialization string) {
-	persistence.A_CreateMaster(name, specialization)
-}
-
-func UC_GetMasters() []map[string]interface{} {
-	return persistence.A_GetMasters()
-}
-
-func UC_DeleteMaster(masterID int) {
-	persistence.A_DeleteMaster(masterID)
-}
-
-// Структура, которая использует интерфейс
 type MasterService struct {
-	repo interface {
-		GetMasters(ctx context.Context) ([]map[string]interface{}, error)
-	}
+	repo *persistence.Repository
 }
 
-// Конструктор (внедрение зависимости через интерфейс)
-func NewMasterService(repo interface {
-	GetMasters(ctx context.Context) ([]map[string]interface{}, error)
-}) *MasterService {
+// NewMasterService создаёт новый сервис для работы с мастерами
+func NewMasterService(repo *persistence.Repository) *MasterService {
 	return &MasterService{repo: repo}
 }
 
-// Метод, который использует интерфейс (а не конкретную реализацию)
-func (s *MasterService) GetAllMasters(ctx context.Context) ([]map[string]interface{}, error) {
+func (s *MasterService) CreateMaster(ctx context.Context, name, specialization string) error {
+	return s.repo.CreateMaster(ctx, name, specialization)
+}
+
+func (s *MasterService) GetMasters(ctx context.Context) ([]map[string]interface{}, error) {
 	return s.repo.GetMasters(ctx)
+}
+
+func (s *MasterService) DeleteMaster(ctx context.Context, masterID int) error {
+	return s.repo.DeleteMaster(ctx, masterID)
 }

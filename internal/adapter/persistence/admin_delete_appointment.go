@@ -1,30 +1,26 @@
 package persistence
 
 import (
-	"GoProject1/internal/infrastructure/db"
 	"context"
 	"fmt"
 )
 
-func P_DeleteAppointment(AppointmentID int) error {
-	// Exec выполняет SQL команду без возврата строк
-	cmd, err := db.Pool.Exec(
-		context.Background(),
+// DeleteAppointment удаляет запись по ID
+func (r *Repository) DeleteAppointment(ctx context.Context, appointmentID int) error {
+	cmd, err := r.DB.Pool.Exec(
+		ctx,
 		`DELETE FROM appointments WHERE id = $1`,
-		AppointmentID,
+		appointmentID,
 	)
 
-	// Если ошибка при выполнении запроса
 	if err != nil {
 		return fmt.Errorf("ошибка удаления записи: %w", err)
 	}
 
-	// Проверяем, была ли удалена хотя бы одна запись
 	rowsAffected := cmd.RowsAffected()
 	if rowsAffected == 0 {
-		return fmt.Errorf("запись с ID %d не найдена", AppointmentID)
+		return fmt.Errorf("запись с ID %d не найдена", appointmentID)
 	}
 
-	// Успешно удалено
 	return nil
 }

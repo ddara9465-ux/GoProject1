@@ -1,7 +1,6 @@
 package persistence
 
 import (
-	"GoProject1/internal/infrastructure/db"
 	"context"
 )
 
@@ -17,29 +16,29 @@ type Appointment struct {
 	Notes           string
 }
 
-// A_GetAllAppointments достаёт все записи + данные клиента (first_name, phone) через JOIN.
-func A_GetAllAppointments(ctx context.Context) ([]Appointment, error) {
-	rows, err := db.Pool.Query(ctx, `
-		SELECT
-			a.id,
-			a.client_id,
-			c.first_name,
-			c.phone,
-			a.procedure,
-			a.employee,
-			a.appointment_date,
-			a.status,
-			a.notes
-		FROM appointments a
-		INNER JOIN clients c ON c.id = a.client_id
-		ORDER BY a.id DESC
-	`)
+// GetAllAppointments достаёт все записи + данные клиента через JOIN
+func (r *Repository) GetAllAppointments(ctx context.Context) ([]Appointment, error) {
+	rows, err := r.DB.Pool.Query(ctx, `
+        SELECT
+            a.id,
+            a.client_id,
+            c.first_name,
+            c.phone,
+            a.procedure,
+            a.employee,
+            a.appointment_date,
+            a.status,
+            a.notes
+        FROM appointments a
+        INNER JOIN clients c ON c.id = a.client_id
+        ORDER BY a.id DESC
+    `)
+
 	if err != nil {
 		return nil, err
 	}
 	defer rows.Close()
 
-	// Собираем результат в слайс структур.
 	apps := make([]Appointment, 0)
 	for rows.Next() {
 		var a Appointment
@@ -59,7 +58,6 @@ func A_GetAllAppointments(ctx context.Context) ([]Appointment, error) {
 		apps = append(apps, a)
 	}
 
-	// Проверяем ошибку, которая могла появиться во время итерации rows.
 	if err := rows.Err(); err != nil {
 		return nil, err
 	}

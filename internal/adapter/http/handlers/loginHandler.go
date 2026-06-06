@@ -8,33 +8,35 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-// показать страницу логина
-func LoginGET(c *gin.Context) {
+type LoginHandler struct {
+	authService *auth.AuthService
+}
+
+func NewLoginHandler(authService *auth.AuthService) *LoginHandler {
+	return &LoginHandler{authService: authService}
+}
+
+func (h *LoginHandler) LoginGET(c *gin.Context) {
 	c.HTML(http.StatusOK, "login.html", nil)
 }
 
-// отправить запрос аутентификации
-func LoginPOST(c *gin.Context) {
-	// получаем данные с формы
+func (h *LoginHandler) LoginPOST(c *gin.Context) {
 	login := c.PostForm("login")
 	password := c.PostForm("password")
 
-	// Функция проверка корректности логина и пароля
-	userID, err := auth.UC_Login(login, password)
-	if err {
+	userID, ok := h.authService.Login(c.Request.Context(), login, password)
+
+	if ok {
 		c.Redirect(http.StatusSeeOther, "/")
-		c.SetCookie("user_id", strconv.Itoa(userID), 3600, "/", "", false, true) // устанавливаем кук с значение userID (запомнили пользователя)
+		c.SetCookie("user_id", strconv.Itoa(userID), 3600, "/", "", false, true)
 	} else {
 		c.HTML(200, "login.html", gin.H{
 			"Error": "Неверный логин или пароль",
 		})
-
 	}
 }
 
-// LogoutPOST - выход из системы (удаляет куки)
-func LogoutPOST(c *gin.Context) {
-	// Удаляем куки, устанавливая expiry в прошлое время
+func (h *LoginHandler) LogoutPOST(c *gin.Context) {
 	c.SetCookie("user_id", "", -1, "/", "", false, true)
 	c.SetCookie("isAdmin", "", -1, "/", "", false, true)
 	c.Redirect(http.StatusSeeOther, "/login")

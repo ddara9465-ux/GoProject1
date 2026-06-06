@@ -31,7 +31,7 @@ func SendNewAppointmentNotify(userID int, date, master, service string) {
 	apiURL := fmt.Sprintf("https://api.telegram.org/bot%s/sendMessage?chat_id=%s&text=%s",
 		botToken, chatID, encodedMessage)
 
-	// Отправляем запрос (с таймаутом 10 секунд)
+	// Отправляем запрос (с таймаутом 30 секунд)
 	client := &http.Client{Timeout: 30 * time.Second}
 	resp, err := client.Get(apiURL)
 	if err != nil {

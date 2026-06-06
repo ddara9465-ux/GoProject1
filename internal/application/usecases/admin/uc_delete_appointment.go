@@ -1,10 +1,8 @@
 package admin
 
-import (
-	"GoProject1/internal/adapter/persistence"
-)
+import "context"
 
-func UC_DeleteAppointment(AppointmentID int) error {
-	err := persistence.P_DeleteAppointment(AppointmentID)
-	return err
+// DeleteAppointment удаляет запись
+func (s *AdminService) DeleteAppointment(ctx context.Context, appointmentID int) error {
+	return s.repo.DeleteAppointment(ctx, appointmentID)
 }
